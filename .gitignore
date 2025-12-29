@@ -3,8 +3,8 @@
 venv/
 
 # byte-compiled / optimized / DLL files
-__pycache__/
-*.pyc
+**/__pycache__/
+**/*.pyc
 
 # macOS files and IDEs
 .DS_Store
@@ -17,3 +17,6 @@ aweber/aweber_token.json
 
 # Output files (you probably don't want to share these either)
 data/
+
+# these are temporary files created manually using chrome dev tools
+buffer/raw_data_dumps/

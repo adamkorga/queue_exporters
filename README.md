@@ -25,12 +25,16 @@ All exporters use a shared set of requirements. Initialize the environment from 
 
 ## Available Exporters
 
-| Tool | Description | Documentation |
-| :--- | :--- | :--- |
-| **AWeber Exporter** | Extracts newsletter broadcasts (sent, scheduled) with preview text and full content. | [aweber/README.md](./aweber/README.md) |
-| *More coming soon* | *Scripts for other platforms are currently being migrated.* | |
+| Tool | Language | Description | Documentation |
+| :--- | :--- |  :--- | :--- |
+| **AWeber Exporter** | Python | Extracts newsletter broadcasts (sent, scheduled) with preview text and full content. | [aweber/README.md](./aweber/README.md) |
+| **Buffer Exporter** | Python | Parses Buffer's GraphQL files to get full list of published and planned posts (used and tested with LinkedIn but it can be easily adapted to other social medias) | [aweber/README.md](./buffer/README.md) |
+| **Blog Crawler** | Node.js | Snapshot of my Astro-based crawler for link checking and PDF archival. | [blog-crawler/README.md](./blog-crawler/README.md) |
 
----
+## Setup
+
+1.  **Python Tools:** Use the `venv` and `requirements.txt` in the root.
+2.  **Node.js Tools:** These are mostly standalone snapshots. See their respective READMEs for local setup (usually involving `npm install puppeteer`).
 
 ## Shared Configuration
 
