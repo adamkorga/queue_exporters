@@ -13,7 +13,7 @@ __pycache__/
 
 # Environment & Secrets (NEVER COMMIT THESE)
 .env
-aweber_token.json
+aweber/aweber_token.json
 
 # Output files (you probably don't want to share these either)
-aweber_export_llm.md
+data/
