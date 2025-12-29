@@ -19,11 +19,7 @@ It handles OAuth 2.0 authorization (with auto-refresh), pagination, and extracts
 ## Setup
 
 1.  **Clone & Venv:**
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    ```
+    Venv should be initialized at repo root level. See readme there.
 
 2.  **Configuration:**
     Run `cp .env.dist .env` and update your credentials.
