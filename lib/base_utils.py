@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 # --- PATH & DIRECTORY MANAGEMENT ---
 
 def get_platform_paths(platform_name, base_data_dir):
-    """Tworzy ustandaryzowaną strukturę ścieżek dla platformy."""
+    """Creates a standardized directory structure for the platform."""
     platform_dir = os.path.abspath(os.path.join(base_data_dir, platform_name))
     media_dir = os.path.join(platform_dir, "media")
     os.makedirs(media_dir, exist_ok=True)
@@ -21,7 +21,7 @@ def get_platform_paths(platform_name, base_data_dir):
 # --- DB PERSISTENCE ---
 
 def load_db(db_path, message_class):
-    """Wczytuje JSON i zwraca metadane oraz słownik obiektów danej klasy."""
+    """Loads JSON and returns metadata along with a dictionary of objects of the given class."""
     if not os.path.exists(db_path):
         return "1970-01-01T00:00:00Z", "Unknown", {}
 
@@ -30,15 +30,15 @@ def load_db(db_path, message_class):
     
     last_sync = data.get("last_sync", "1970-01-01T00:00:00Z")
     list_name = data.get("list_name", "Unknown")
-    # Rekonstrukcja obiektów
+
     messages = {mid: message_class.from_dict(m) for mid, m in data.get("messages", {}).items()}
     
     return last_sync, list_name, messages
 
 def save_all(message_objects_dict, paths, last_sync, list_name, title="Archive"):
-    """Zapisuje bazę JSON oraz generuje Markdown w jednym kroku."""
+    """Saves the JSON database and generates Markdown in one step."""
     
-    # 1. Zapis JSON (Serializacja obiektów)
+    # 1. Save JSON (Serialize objects)
     db_data = {
         "last_sync": last_sync,
         "list_name": list_name,
@@ -48,7 +48,7 @@ def save_all(message_objects_dict, paths, last_sync, list_name, title="Archive")
     with open(paths['db'], 'w', encoding='utf-8') as f:
         json.dump(db_data, f, indent=2, ensure_ascii=False)
     
-    # 2. Zapis Markdown (Rendering)
+    # 2. Save Markdown (Rendering)
     sorted_msgs = sorted(message_objects_dict.values(), key=lambda x: x.date, reverse=True)
     
     print(f"📄 Writing {len(sorted_msgs)} items to {paths['export']}...")

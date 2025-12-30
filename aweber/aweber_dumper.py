@@ -12,7 +12,6 @@ from lib.base_utils import get_platform_paths, clean_html_content, load_db, save
 from lib.oauth_session import setup_oauth_session
 from lib.message_model import BaseMessage
 
-
 # --- 1. CONFIG & PATHS ---
 load_dotenv()
 
@@ -31,7 +30,7 @@ def main():
     if args.full and os.path.exists(PATHS['db']):
         os.rename(PATHS['db'], f"{PATHS['db']}.bak")
     
-    # Używamy uniwersalnego loadera z lib/
+    # Load existing data from local DB file (if exists)
     last_sync, list_name, messages = load_db(PATHS['db'], BaseMessage)
     start_filter = args.from_date if args.from_date else last_sync
 
@@ -54,7 +53,7 @@ def main():
     target_list = list_data['entries'][0]
     list_name = target_list['name']
 
-    # Czyścimy drafty/scheduled, zostawiamy tylko pewne 'sent'
+    # Clean drafts/scheduled, keep only certain 'sent'
     if not args.full:
         messages = {mid: m for mid, m in messages.items() if m.status == 'sent'}
 
@@ -85,7 +84,6 @@ def main():
                 d = d_resp.json()
                 cleaned = clean_html_content(d.get('body_html'))
                 
-                # Tworzymy obiekt od razu
                 messages[mid] = BaseMessage(
                     id=mid, date=mdate, status=d.get('status') or status,
                     content=cleaned['body'], subject=d.get('subject'),
@@ -95,7 +93,6 @@ def main():
 
     # --- 5. SAVE ---
     last_sync = datetime.now().isoformat()
-    # Jedno wywołanie załatwia JSON i Markdown
     save_all(messages, PATHS, last_sync, list_name, title="AWeber Archive")
     print("✅ Done!")
 

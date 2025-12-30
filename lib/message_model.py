@@ -14,16 +14,16 @@ class BaseMessage:
         self.subchannel = subchannel
 
     def to_dict(self):
-        """Konwertuje obiekt na słownik do zapisu w JSON."""
+        """Converts the object to a dictionary for JSON serialization."""
         return self.__dict__
 
     @classmethod
     def from_dict(cls, data):
-        """Tworzy obiekt klasy na podstawie słownika z JSON."""
+        """Creates an instance of the class from a dictionary loaded from JSON."""
         return cls(**data)
 
     def to_markdown(self, index, media_base_path=None):
-        """Generuje fragment Markdown dla tej konkretnej wiadomości."""
+        """Generates a Markdown fragment for this specific message."""
         lines = [
             "---",
             f"## {index}. {self.subject or f'Post {self.date}'}",
@@ -47,7 +47,6 @@ class BaseMessage:
             for item in self.media:
                 if item['type'] == 'image':
                     url = item['url']
-                    # Logika relatywnej ścieżki przeniesiona tutaj
                     if media_base_path and url.startswith(media_base_path):
                         import os
                         url = os.path.join("media", os.path.basename(url))

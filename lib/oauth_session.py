@@ -5,7 +5,7 @@ import os
 # --- OAUTH2 SESSION MANAGEMENT ---
 def setup_oauth_session(client_id, client_secret, token_file, auth_url, token_url, redirect_uri, scopes):
     """
-    Zarządza pełnym cyklem sesji OAuth2: ładowanie, autoryzacja i auto-refresh.
+    Manages the full OAuth2 session lifecycle: loading, authorization, and auto-refresh.
     """
     
     def token_updater(token):
@@ -18,7 +18,7 @@ def setup_oauth_session(client_id, client_secret, token_file, auth_url, token_ur
         with open(token_file, 'r') as f:
             token = json.load(f)
 
-    # Parametry do auto-odświeżania (wymagane przez niektóre implementacje OAuth2)
+    # Parameters for auto-refresh (required by some OAuth2 implementations)
     extra = {'client_id': client_id, 'client_secret': client_secret}
     
     session = OAuth2Session(
@@ -31,7 +31,7 @@ def setup_oauth_session(client_id, client_secret, token_file, auth_url, token_ur
         scope=scopes
     )
 
-    # Inicjalna autoryzacja, jeśli brak tokena lub jest całkowicie nieważny
+    # Initial authorization if no token or token is completely invalid
     if not token:
         authorization_url, _ = session.authorization_url(auth_url)
         print(f"🔐 Initial Authorization Required:\n{authorization_url}")

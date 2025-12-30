@@ -1,11 +1,14 @@
 import os
 import sys
 
-# Upewniamy się, że model może zaimportować BaseMessage z lib
+# Add ../lib to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from lib.message_model import BaseMessage
 
 class BufferMessage(BaseMessage):
+    """
+    Extends BaseMessage to include social media specific fields like metrics and link attachments.
+    """
     def __init__(self, id, date, status, content, metrics=None, link_attachment=None, **kwargs):
         super().__init__(id, date, status, content, **kwargs)
         self.metrics = metrics if metrics is not None else {}

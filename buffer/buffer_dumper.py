@@ -7,11 +7,12 @@ import glob
 import subprocess
 from datetime import datetime
 
-# Dodanie ../lib do ścieżki Pythona
+from buffer_message import BufferMessage 
+
+# Add ../lib to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 from lib.base_utils import get_platform_paths, load_db, save_all
-from buffer_message import BufferMessage # Import lokalny z tego samego folderu
 
 # --- CONFIG ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -24,11 +25,14 @@ PATHS = get_platform_paths("linkedin", BASE_DATA_DIR)
 def download_data():
     """
     This requires headless browser to handle. 
-    I might do it when I get tired of using dev tools but for now it is what it is.
+    I might do it when I get tired of using Chrome DevTools but for now it is what it is.
     """
     pass
 
 def download_image(url, media_dir, post_id, index):
+    """
+    Downloads an image from a URL and saves it locally. 
+    """
     if not url: return None
     ext = ".jpg"
     if ".png" in url.lower(): ext = ".png"
@@ -48,6 +52,10 @@ def download_image(url, media_dir, post_id, index):
     return None
 
 def parse_gql_file(filepath, status_fallback):
+    """
+    Parses a Buffer GraphQL JSON dump file from Buffer for social media posts. (LinkedIn in my case)
+    Returns a dictionary of BufferMessage objects keyed by message ID.
+    """
     if not os.path.exists(filepath):
         print(f"ℹ️ File not found: {os.path.basename(filepath)}")
         return {}
@@ -98,7 +106,8 @@ def parse_gql_file(filepath, status_fallback):
     return messages
 
 def compress_pdf(input_path, output_path):
-    """Wywołuje Ghostscripta do kompresji pliku PDF."""
+    """Calls Ghostscript to compress a PDF file."""
+
     print(f"🗜️  Compressing PDF using Ghostscript...")
     cmd = [
         "gs", "-sDEVICE=pdfwrite", "-dCompatibilityLevel=1.4",
@@ -107,16 +116,18 @@ def compress_pdf(input_path, output_path):
     ]
     try:
         subprocess.run(cmd, check=True)
-        # Usuwamy plik tymczasowy po udanej kompresji
+        # Remove the temporary file after successful compression
         if input_path != output_path and os.path.exists(input_path):
             os.remove(input_path)
     except subprocess.CalledProcessError as e:
         print(f"⚠️  Ghostscript failed: {e}")
     except FileNotFoundError:
         print("⚠️  Ghostscript (gs) not found in system. Compression skipped.")
+        # If Ghostscript is not available, just rename the input to output
+        os.rename(input_path, output_path) 
 
 def generate_pdf_archive(messages, output_path, title):
-    """Generuje PDF z obsługą Unicode i automatyczną kompresją."""
+    """Generates a PDF with Unicode support and automatic compression."""
     try:
         from fpdf import FPDF
         from fpdf.enums import XPos, YPos
@@ -124,7 +135,6 @@ def generate_pdf_archive(messages, output_path, title):
         print("⚠️ fpdf2 not installed. Skipping PDF generation. (pip install fpdf2)")
         return
 
-    # Tworzymy najpierw plik tymczasowy ("surowy")
     temp_pdf = output_path.replace(".pdf", ".raw.pdf")
     print(f"🎨 Rendering raw PDF: {os.path.basename(temp_pdf)}...")
     
@@ -173,8 +183,8 @@ def generate_pdf_archive(messages, output_path, title):
         pdf.cell(0, 10, f"{i}. Post from {msg.date} ({msg.status.upper()})", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
         set_safe_font("", 10)
         
-        # Uwaga: fpdf2 wyrzuci ostrzeżenia o brakujących glifach (emoji), 
-        # ale wygeneruje tekst z kropkami/znakami zapytania zamiast nich.
+        # Notice: fpdf2 will issue warnings about missing glyphs (emoji), 
+        # but it will generate text with dots/question marks instead of them.
         clean_text = msg.content if has_unicode_font else msg.content.encode('cp1250', 'replace').decode('cp1250')
         pdf.multi_cell(0, 5, clean_text)
         pdf.ln(2)
@@ -194,7 +204,7 @@ def generate_pdf_archive(messages, output_path, title):
 
     pdf.output(temp_pdf)
     
-    # Kompresja końcowa
+    # Final compression step
     compress_pdf(temp_pdf, output_path)
 
 def main():
@@ -206,10 +216,10 @@ def main():
     if args.full and os.path.exists(PATHS['db']):
         os.rename(PATHS['db'], f"{PATHS['db']}.bak")
 
-    # 1. Ładowanie bazy za pomocą base_utils
+    # 1. Load existing DB from json
     last_sync, list_name, messages = load_db(PATHS['db'], BufferMessage)
     
-    # 2. Inkrementacja: zachowujemy tylko wysłane przed parsowaniem nowych zrzutów
+    # 2. Incremental update: keep only sent messages before parsing new dumps
     if not args.full:
         messages = {mid: m for mid, m in messages.items() if m.status == 'sent'}
 
@@ -226,7 +236,7 @@ def main():
     for f in queue_files:
         messages.update(parse_gql_file(f, "scheduled"))
 
-    # 3. Zapis wszystkiego (JSON + MD) jednym wywołaniem
+    # 3. Save everything (JSON + MD) in one call
     last_sync = datetime.now().isoformat()
     save_all(
         messages, 
@@ -236,7 +246,7 @@ def main():
         title="LinkedIn Archive"
     )
     
-    # 4. Generacja i kompresja PDF
+    # 4. Generate and compress PDF
     if args.pdf:
         pdf_path = PATHS['export'].replace(".md", ".pdf")
         generate_pdf_archive(messages, pdf_path, "LinkedIn Archive (Adam Korga)")

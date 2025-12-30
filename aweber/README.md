@@ -38,8 +38,6 @@ Full Refresh: `--full` Wipes the local cache and re-downloads everything from sc
 
 Date Filtering: `--from-date YYYY-MM-DD` / `--to-date YYYY-MM-DD` Fetch messages within a specific timeframe (applied to sent messages).
 
-Skip Markdown: `--skip-summary` Updates the JSON database but doesn't regenerate the .md file.
-
 ## Known Issues
 Drafts Reliability: AWeber API can be... let's say, eccentric regarding Drafts. Depending on your App Scopes in Labs, the script might skip them with a 401/403 error. I might fix it if I ever find the patience to battle their OAuth scope system again.
 
